@@ -98,8 +98,16 @@ body {
 }
 
 .summits {
-	height: 24px;
+	height: 36px;
 	width: 24px;
+	position: absolute;
+	top: 0;
+	right: 0;
+}
+
+.tile-icon {
+	height: 26px;
+	width: 26px;
 	position: absolute;
 	top: 0;
 	right: 0;
@@ -115,4 +123,19 @@ body {
 	max-height: 100px;
 	width: 100px;
 	border: 1px solid black;
+}
+
+.start-button {
+	padding: 1rem 2rem;
+	background: black;
+	color: white;
+	border: none;
+	font-weight: bold;
+	font-size: 1.5em;
+	border-radius: 100px;
+	box-shadow: 0 0.1rem 0.1rem black;
+
+	&:hover {
+		cursor: pointer;
+	}
 }
