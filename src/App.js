@@ -1,7 +1,8 @@
-import React, { useState, useEffect, useRef, useReducer } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import './App.scss';
 import Board from './components/Board';
 import useInterval from './hooks/useInterval';
+import Overview from './components/Overview';
 
 const generateRandom100 = () => {
 	return Math.floor(Math.random() * 100) + 1;
@@ -29,48 +30,66 @@ export default function App() {
 
 	const [startGame, setStartGame] = useState(false);
 
-	const [gold, setGold] = useState(1000);
-	const [income, setIncome] = useState(0);
-	const [stone, setStone] = useState(0);
-	const [combat, setCombat] = useState(0);
-	const [food, setFood] = useState(0);
+	let gold = useRef(750);
+	let income = useRef(0);
+	let stone = useRef(0);
+	let combat = useRef(0);
+	let food = useRef(0);
+	let land = useRef(0);
 
-	const [land, setLand] = useState(0);
-	const [val, setVal] = useState(generate100());
+	// const [ref, setRef] = useState(null);
 
-	const [farms, setFarms] = useState(0);
-	const [megaFarms, setMegaFarms] = useState(0);
+	// const onRefChange = useCallback((node) => {
+	// 	// ref value changed to node
+	// 	// setRef(node); // e.g. change ref state to trigger re-render
+	// 	if (node === null) {
+	// 		// node is null, if DOM node of ref had been unmounted before
+	// 	} else {
+	// 		// ref value exists
 
-	const [stoneMines, setStoneMines] = useState(0);
-	const [megaStoneMines, setMegaStoneMines] = useState(0);
+	// 	}
+	// }, []);
 
-	const [wolves, setWolves] = useState(0);
-	const [alphaWolf, setAlphaWolf] = useState(0);
+	// const [val, setVal] = useState(generate100());
 
-	const [emptyTile, setEmptyTile] = useState(0);
-	const [mountain, setMountain] = useState(0);
+	// const [farms, setFarms] = useState(0);
+	// const [megaFarms, setMegaFarms] = useState(0);
+
+	// const [stoneMines, setStoneMines] = useState(0);
+	// const [megaStoneMines, setMegaStoneMines] = useState(0);
+
+	// const [wolves, setWolves] = useState(0);
+	// const [alphaWolf, setAlphaWolf] = useState(0);
+
+	// const [emptyTile, setEmptyTile] = useState(0);
+	// const [mountain, setMountain] = useState(0);
 
 	// Updates gold and land when player clicks a tile
-	const handleClick = (amount) => {
-		if (gold >= amount) {
-			setGold((gold) => gold - amount);
-			setLand((land) => land + 1);
-		}
-	};
+	// const handleClick = (amount) => {
+	// 	if (gold.current >= amount) {
+	// 		gold.current = gold.current - amount;
+	// 		land.current = land.current + 1;
+	// 		// setGold((gold) => gold - amount);
+	// 		// setLand((land) => land + 1);
+	// 	}
+	// };
 
 	// Increase income
 	const increaseIncome = () => {
-		setIncome((income) => income + 5);
+		// setIncome((income) => income + 5);
+		income.current = income.current + 5;
 	};
 
 	// Increase income every time land gets updated
 	useEffect(() => {
-		if (land > 0) increaseIncome();
-	}, [land]);
+		if (land.current > 0) increaseIncome();
+	}, [land.current]);
 
 	// Update gold every 5s
 	useInterval(() => {
-		setGold((gold) => gold + income);
+		// setGold((gold) => gold + income);
+		// gold = gold + income;
+		gold.current = gold.current + income.current;
 	}, 5000);
 
 	/*
@@ -102,14 +121,14 @@ export default function App() {
 				else if (random < 50 && random > 40) {
 					// 5% chance to create Mega Farm
 					let megaChance = createRandomNum();
-					if (megaChance <= 5) {
+					if (megaChance <= 12) {
 						setBoard((prevBoard) => {
 							prevBoard[i][j] = 2;
 							return prevBoard;
 						});
 					} else {
 						setBoard((prevBoard) => {
-							prevBoard[i][j] = 3;
+							prevBoard[i][j] = 1;
 							return prevBoard;
 						});
 					}
@@ -119,7 +138,7 @@ export default function App() {
 				else if (random > 20 && random <= 40) {
 					// 5% chance to create Mega Stone mine
 					let megaChance = createRandomNum();
-					if (megaChance <= 5) {
+					if (megaChance <= 12) {
 						setBoard((prevBoard) => {
 							prevBoard[i][j] = 4;
 							return prevBoard;
@@ -136,7 +155,7 @@ export default function App() {
 				else if (random <= 20 && random > 9) {
 					// 5% chance to create Alpha Wolf
 					let megaChance = createRandomNum();
-					if (megaChance <= 5) {
+					if (megaChance <= 8) {
 						setBoard((prevBoard) => {
 							prevBoard[i][j] = 6;
 							return prevBoard;
@@ -158,7 +177,7 @@ export default function App() {
 	};
 
 	useEffect(() => {
-		createGameBoard();
+		!startGame && createGameBoard();
 	}, []);
 
 	const handleStartGame = () => setStartGame(true);
@@ -166,14 +185,16 @@ export default function App() {
 	return (
 		<div className="container">
 			{startGame && (
-				<ul className="overview">
-					<li>{`Gold: ${gold}`}</li>
-					<li>{`Income: ${income}`}</li>
-					<li>{`Land: ${land}`}</li>
-					<li>{`Food: ${food}`}</li>
-					<li>{`Stone: ${stone}`}</li>
-					<li>{`Combat: ${combat}`}</li>
-				</ul>
+				<Overview
+					ref={{
+						gold: gold,
+						land: land,
+						food: food,
+						stone: stone,
+						combat: combat,
+						income: income,
+					}}
+				/>
 			)}
 
 			{!startGame && (
@@ -185,8 +206,14 @@ export default function App() {
 				<Board
 					board={board}
 					className="board-container"
-					handleClick={handleClick}
-					memoArr={val}
+					ref={{
+						gold: gold,
+						land: land,
+						food: food,
+						stone: stone,
+						combat: combat,
+						income: income,
+					}}
 				/>
 			)}
 		</div>
