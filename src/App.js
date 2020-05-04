@@ -60,161 +60,167 @@ export default function App() {
 	}, 5000);
 
 	const createGameBoard = () => {
-		const initData = (i, j, type) => {
-			// initial tile data
-			let manual = {
-				Empty: {
-					amount: {
-						gold: 150,
-						stone: 0,
-						combat: 0,
+		return new Promise((res, rej) => {
+			const initData = (i, j, type) => {
+				// initial tile data
+				let manual = {
+					Empty: {
+						amount: {
+							gold: 150,
+							stone: 0,
+							combat: 0,
+						},
+						image: null,
 					},
-					image: null,
-				},
-				Farm: {
-					amount: {
-						gold: 250,
-						stone: 50,
-						combat: 0,
+					Farm: {
+						amount: {
+							gold: 250,
+							stone: 50,
+							combat: 0,
+						},
+						image: Farm,
 					},
-					image: Farm,
-				},
-				MegaFarm: {
-					amount: {
-						gold: 1000,
-						stone: 200,
-						combat: 0,
+					MegaFarm: {
+						amount: {
+							gold: 1000,
+							stone: 200,
+							combat: 0,
+						},
+						image: MegaFarm,
 					},
-					image: MegaFarm,
-				},
-				StoneMine: {
-					amount: {
-						gold: 400,
-						stone: 0,
-						combat: 0,
+					StoneMine: {
+						amount: {
+							gold: 400,
+							stone: 0,
+							combat: 0,
+						},
+						image: StoneMine,
 					},
-					image: StoneMine,
-				},
-				MegaStoneMine: {
-					amount: {
-						gold: 2000,
-						stone: 200,
-						combat: 250,
+					MegaStoneMine: {
+						amount: {
+							gold: 2000,
+							stone: 200,
+							combat: 250,
+						},
+						image: MegaStoneMine,
 					},
-					image: MegaStoneMine,
-				},
-				Wolf: {
-					amount: {
-						gold: 150,
-						combat: 250,
-						stone: 0,
+					Wolf: {
+						amount: {
+							gold: 150,
+							combat: 250,
+							stone: 0,
+						},
+						image: Wolf,
 					},
-					image: Wolf,
-				},
-				AlphaWolf: {
-					amount: {
-						gold: 150,
-						stone: 0,
-						combat: 1500,
+					AlphaWolf: {
+						amount: {
+							gold: 150,
+							stone: 0,
+							combat: 1500,
+						},
+						image: AlphaWolf,
 					},
-					image: AlphaWolf,
-				},
-				Mountain: {
-					amount: {
-						gold: 750,
-						stone: 50,
-						combat: 150,
+					Mountain: {
+						amount: {
+							gold: 750,
+							stone: 50,
+							combat: 150,
+						},
+						image: Mountain,
 					},
-					image: Mountain,
-				},
+				};
+
+				return {
+					position: [i, j],
+					i: i,
+					j: j,
+					isBought: false,
+					type: type,
+					image: manual[type].image,
+					cost: manual[type].amount,
+				};
 			};
 
-			return {
-				position: [i, j],
-				i: i,
-				j: j,
-				isBought: false,
-				type: type,
-				image: manual[type].image,
-				cost: manual[type].amount,
-			};
-		};
+			for (let i = 0; i < board.length; i++) {
+				for (let j = 0; j < board[i].length; j++) {
+					// create a random number
+					let random = createRandomNum();
 
-		for (let i = 0; i < board.length; i++) {
-			for (let j = 0; j < board[i].length; j++) {
-				// create a random number
-				let random = createRandomNum();
-
-				// create an empty tile 50% of the time
-				if (random >= 50) {
-					setBoard((prevBoard) => {
-						prevBoard[i][j] = initData(i, j, 'Empty');
-						return prevBoard;
-					});
-				}
-
-				// Create a farm 9% of the time
-				else if (random < 50 && random > 40) {
-					// 5% chance to create Mega Farm
-					let megaChance = createRandomNum();
-					if (megaChance <= 12) {
+					// create an empty tile 50% of the time
+					if (random >= 50) {
 						setBoard((prevBoard) => {
-							prevBoard[i][j] = initData(i, j, 'MegaFarm');
-							return prevBoard;
-						});
-					} else {
-						setBoard((prevBoard) => {
-							prevBoard[i][j] = initData(i, j, 'Farm');
+							prevBoard[i][j] = initData(i, j, 'Empty');
 							return prevBoard;
 						});
 					}
-				}
 
-				// 19% chance to create an stone mine
-				else if (random > 20 && random <= 40) {
-					// 5% chance to create Mega Stone mine
-					let megaChance = createRandomNum();
-					if (megaChance <= 12) {
-						setBoard((prevBoard) => {
-							prevBoard[i][j] = initData(i, j, 'MegaStoneMine');
-							return prevBoard;
-						});
+					// Create a farm 9% of the time
+					else if (random < 50 && random > 40) {
+						// 5% chance to create Mega Farm
+						let megaChance = createRandomNum();
+						if (megaChance <= 12) {
+							setBoard((prevBoard) => {
+								prevBoard[i][j] = initData(i, j, 'MegaFarm');
+								return prevBoard;
+							});
+						} else {
+							setBoard((prevBoard) => {
+								prevBoard[i][j] = initData(i, j, 'Farm');
+								return prevBoard;
+							});
+						}
+					}
+
+					// 19% chance to create an stone mine
+					else if (random > 20 && random <= 40) {
+						// 5% chance to create Mega Stone mine
+						let megaChance = createRandomNum();
+						if (megaChance <= 12) {
+							setBoard((prevBoard) => {
+								prevBoard[i][j] = initData(i, j, 'MegaStoneMine');
+								return prevBoard;
+							});
+						} else {
+							setBoard((prevBoard) => {
+								prevBoard[i][j] = initData(i, j, 'StoneMine');
+								return prevBoard;
+							});
+						}
+					}
+
+					// 10%
+					else if (random <= 20 && random > 9) {
+						// 5% chance to create Alpha Wolf
+						let megaChance = createRandomNum();
+						if (megaChance <= 8) {
+							setBoard((prevBoard) => {
+								prevBoard[i][j] = initData(i, j, 'AlphaWolf');
+								return prevBoard;
+							});
+						} else {
+							setBoard((prevBoard) => {
+								prevBoard[i][j] = initData(i, j, 'Wolf');
+								return prevBoard;
+							});
+						}
 					} else {
 						setBoard((prevBoard) => {
-							prevBoard[i][j] = initData(i, j, 'StoneMine');
+							prevBoard[i][j] = initData(i, j, 'Mountain');
 							return prevBoard;
 						});
 					}
-				}
-
-				// 10%
-				else if (random <= 20 && random > 9) {
-					// 5% chance to create Alpha Wolf
-					let megaChance = createRandomNum();
-					if (megaChance <= 8) {
-						setBoard((prevBoard) => {
-							prevBoard[i][j] = initData(i, j, 'AlphaWolf');
-							return prevBoard;
-						});
-					} else {
-						setBoard((prevBoard) => {
-							prevBoard[i][j] = initData(i, j, 'Wolf');
-							return prevBoard;
-						});
-					}
-				} else {
-					setBoard((prevBoard) => {
-						prevBoard[i][j] = initData(i, j, 'Mountain');
-						return prevBoard;
-					});
 				}
 			}
-		}
+		});
+	};
+
+	const initBoard = () => {
+		createGameBoard().then(addNeighborData());
 	};
 
 	// create the game board if the user has clicked to start the game
 	useEffect(() => {
-		!startGame && createGameBoard();
+		!startGame && initBoard();
 	}, []);
 
 	// start the game
@@ -226,23 +232,24 @@ export default function App() {
 		let isBase = data.isBase;
 		let gold = data.cost.gold;
 		let image = data.image;
+		let type = data.type;
+		let i = data.i;
+		let j = data.j;
 
 		return (
 			<li
 				className={
-					data.isBought
+					isBought
 						? isBase
 							? ' tile-is-bought base'
 							: 'tile-is-bought'
 						: 'tile'
 				}
-				key={`[${data.i},${data.j}]`}
+				key={`[${i},${j}]`}
 				onClick={() => handleClick(data)}
 			>
-				{data.isBought ? isBase ? 'B' : <span>{'Owned'}</span> : data.cost.gold}
-				{data.type !== 'Empty' ? (
-					<img src={data.image} className="tile-icon" />
-				) : null}
+				{isBought ? isBase ? 'B' : <span>{'Owned'}</span> : gold}
+				{type !== 'Empty' ? <img src={image} className="tile-icon" /> : null}
 			</li>
 		);
 	};
@@ -317,6 +324,76 @@ export default function App() {
 		});
 	};
 
+	const addNeighborData = () => {
+		for (let i = 0; i < board.length; i++) {
+			for (let j = 0; j < board[i].length; j++) {
+				let data = board[i][j];
+				let neighbors = getNeighbors(i, j, data);
+				// console.log(neighbors);
+
+				// for (let k = 0; k < neighbors.length; k++) {
+				// 	let numStoneMines = 0;
+				// 	let numMegaStoneMines = 0;
+				// 	let numFarm = 0;
+				// 	let numMegaFarm = 0;
+				// 	let numWolf = 0;
+				// 	let numAlphaWolf = 0;
+				// 	let numMountain = 0;
+
+				// 	if (neighbors[k].type === 'Wolf') numWolf += 1;
+				// 	if (neighbors[k].type === 'AlphaWolf') numAlphaWolf += 1;
+				// 	if (neighbors[k].type === 'Farm') numFarm += 1;
+				// 	if (neighbors[k].type === 'MegaFarm') numMegaFarm += 1;
+				// 	if (neighbors[k].type === 'StoneMine') numStoneMines += 1;
+				// 	if (neighbors[k].type === 'MegaStoneMine') numMegaStoneMines += 1;
+				// 	if (neighbors[k].type === 'Mountain') numMountain += 1;
+
+				// 	let newData = {
+				// 		neighbors: {
+				// 			StoneMine: numStoneMines,
+				// 			MegaStoneMine: numMegaStoneMines,
+				// 			Farm: numFarm,
+				// 			MegaFarm: numMegaFarm,
+				// 			Wolf: numWolf,
+				// 			AlphaWolf: numAlphaWolf,
+				// 			Mountain: numMountain,
+				// 		},
+				// 	};
+
+				// 	neighbors[k] = Object.assign({ ...data, ...newData });
+				// }
+			}
+		}
+	};
+
+	const getNeighbors = (i, j) => {
+		/* Check for every neightbor
+			[] [] []
+			[] [] []
+			[] [] []
+		*/
+
+		// Deep clone board
+		const clonedBoard = board.slice();
+		console.log(clonedBoard[i + 1][j]);
+
+		const neighbors = [];
+
+		// 	// Check for existence of neights
+		// 	if (board[i - 1][j - 1] !== 'undefined')
+		// 		neighbors.push(board[i - 1][j - 1]);
+		// 	if (board[i - 1][j]) neighbors.push(board[i - 1][j]);
+		// 	if (board[i - 1][j + 1]) neighbors.push(board[i - 1][j + 1]);
+
+		// 	if (board[i + 1][j - 1]) neighbors.push(board[i + 1][j - 1]);
+		// 	if (board[i + 1][j]) neighbors.push(board[i + 1][j]);
+		// 	if (board[i + 1][j + 1]) neighbors.push(board[i + 1][j + 1]);
+
+		// 	if (board[i][j - 1]) neighbors.push(board[i][j - 1]);
+		// 	if (board[i][j + 1]) neighbors.push(board[i][j + 1]);
+
+		// 	return neighbors;
+	};
 	return (
 		<div className="container">
 			{startGame && (
