@@ -5,17 +5,37 @@
 body {
 	margin: 0;
 	padding: 0;
+	font-family: Open Sans;
+}
+
+.base {
+	background: green !important;
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	font-weight: bold;
+	font-size: 5em !important;
+}
+
+.tile-is-bought {
+	height: 100px;
+	width: 100px;
+	background: white;
+	margin: 4px;
+	color: black;
+	font-size: 1em;
+	position: relative;
+}
+
+.owned {
+	color: #b0b389;
+	font-weight: bold;
 }
 
 .tile {
-	// height: 50px;
-	// width: 50px;
 	height: 100px;
 	width: 100px;
-	// background-image: linear-gradient(to bottom, #434343 0%, black 100%);
-	// background: #434343;
 	background: white;
-	// border: 1px solid #434343;
 	margin: 4px;
 	color: black;
 	font-size: 1em;
