@@ -21,7 +21,7 @@ import Bought from './images/bought.png';
 const createRandomNum = () => Math.floor(Math.random() * 100) + 1;
 
 export default function App() {
-	const [board, setBoard] = useState([
+	const initBoardLayout = [
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -32,7 +32,8 @@ export default function App() {
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
 		[0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-	]);
+	];
+	const [board, setBoard] = useState(initBoardLayout);
 
 	const [startGame, setStartGame] = useState(false);
 	const [boardCreated, setBoardCreated] = useState(false);
@@ -41,7 +42,7 @@ export default function App() {
 	const [income, setIncome] = useState(0);
 	const [stone, setStone] = useState(200);
 	const [combat, setCombat] = useState(50);
-	const [food, setFood] = useState(100);
+	const [food, setFood] = useState(5);
 	const [base, setBase] = useState(false);
 
 	const [land, setLand] = useState(0);
@@ -55,6 +56,8 @@ export default function App() {
 	const [numMountains, setNumMountains] = useState(0);
 	const [numEmpty, setNumEmpty] = useState(0);
 
+	const [clickMultiplier, setClickMultiplier] = useState(1);
+
 	const [goodEconomy, setGoodEconomy] = useState(false);
 	const [greatEconomy, setGreatEconomy] = useState(false);
 	const [badEconomy, setBadEconomy] = useState(false);
@@ -64,6 +67,10 @@ export default function App() {
 	const greatEconomyMultiplier = 2;
 	const badEconomyMultiplier = 0.8;
 	const horribleEconomyMultiplier = 0.2;
+
+	const alphaWolfCombat = 2500;
+	const wolfCombat = 250;
+	const mountainCombat = 200;
 
 	let landGold = 5;
 
@@ -132,12 +139,27 @@ export default function App() {
 			setBadEconomy(false);
 			setHorribleEconomy(true);
 		}
+
+		// if (food <= 0) {
+
+		// }
 	}, [food]);
 
-	// Increase income every time land gets updated
+	// const restartGame = () => {
+	// 	setBoard(initBoardLayout);
+	// };
+
+	// update income based on enconomy health food and land
 	useEffect(() => {
-		if (land > 0) increaseIncome();
-	}, [land]);
+		if (land >= 5) increaseMultiplier();
+		increaseIncome();
+	}, [land, food]);
+
+	const increaseMultiplier = () => {
+		if (land >= 5) setClickMultiplier(2);
+		if (land >= 10) setClickMultiplier(5);
+		if (land >= 15) setClickMultiplier(10);
+	};
 
 	// Update resources every 5s
 	useInterval(() => {
@@ -402,18 +424,18 @@ export default function App() {
 		if (type === 'MegaFarm') setNumMegaFarms((x) => x + 1);
 		if (type === 'Wolf') {
 			setNumWolves((x) => x + 1);
-			setCombat((combat) => combat + 250);
+			setCombat((combat) => combat + wolfCombat);
 		}
 
 		if (type === 'AlphaWolf') {
 			setNumAlphaWolves((x) => x + 1);
-			setCombat((combat) => combat + 2500);
+			setCombat((combat) => combat + alphaWolfCombat);
 		}
 		if (type === 'StoneMine') setNumStoneMines((x) => x + 1);
 		if (type === 'MegaStoneMine') setNumMegaStoneMines((x) => x + 1);
 		if (type === 'Mountain') {
 			setNumMountains((x) => x + 1);
-			setCombat((combat) => combat + 200);
+			setCombat((combat) => combat + mountainCombat);
 		}
 		if (type === 'Empty') setNumEmpty((x) => x + 1);
 
@@ -506,6 +528,12 @@ export default function App() {
 
 		return neighbors;
 	};
+
+	// Resource Click Multiplier
+	const handleResourceClick = () => {
+		if (base) setGold((gold) => gold + 1 * clickMultiplier);
+	};
+
 	return (
 		<div className="container">
 			{startGame && (
@@ -540,8 +568,8 @@ export default function App() {
 			)}
 			{startGame && (
 				<div className="resource-click-container">
-					<div className="resource-description"> Multiplier: 1x</div>
-					<button className="resource-click">
+					<div className="resource-description">{`Multiplier: ${clickMultiplier}x`}</div>
+					<button className="resource-click" onClick={handleResourceClick}>
 						<span>Gold!</span>
 					</button>
 				</div>
