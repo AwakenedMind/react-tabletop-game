@@ -35,193 +35,287 @@ export default function App() {
 	]);
 
 	const [startGame, setStartGame] = useState(false);
+	const [boardCreated, setBoardCreated] = useState(false);
 
 	const [gold, setGold] = useState(1000);
 	const [income, setIncome] = useState(0);
-	const [stone, setStone] = useState(1000);
+	const [stone, setStone] = useState(200);
 	const [combat, setCombat] = useState(50);
 	const [food, setFood] = useState(100);
-	const [land, setLand] = useState(0);
 	const [base, setBase] = useState(false);
+
+	const [land, setLand] = useState(0);
+
+	const [numStoneMines, setNumStoneMines] = useState(0);
+	const [numMegaStoneMines, setNumMegaStoneMines] = useState(0);
+	const [numWolves, setNumWolves] = useState(0);
+	const [numAlphaWolves, setNumAlphaWolves] = useState(0);
+	const [numFarms, setNumFarms] = useState(0);
+	const [numMegaFarms, setNumMegaFarms] = useState(0);
+	const [numMountains, setNumMountains] = useState(0);
+	const [numEmpty, setNumEmpty] = useState(0);
+
+	const [goodEconomy, setGoodEconomy] = useState(false);
+	const [greatEconomy, setGreatEconomy] = useState(false);
+	const [badEconomy, setBadEconomy] = useState(false);
+	const [horribleEconomy, setHorribleEconomy] = useState(false);
+
+	const goodEconomyMultiplier = 1.4;
+	const greatEconomyMultiplier = 2;
+	const badEconomyMultiplier = 0.8;
+	const horribleEconomyMultiplier = 0.2;
+
+	let landGold = 5;
+
+	// Update Tiles / Resources Functions
+	const updateGold = (cost) => setGold((gold) => gold - cost);
+	const updateLand = () => setLand((land) => land + 1);
+	const updateStone = (cost) => setStone((stone) => stone - cost);
+	const updateCombat = (cost) => setCombat(combat);
 
 	// Increase income
 	const increaseIncome = () => {
-		setIncome((income) => income + 5);
+		if (goodEconomy) {
+			setIncome((income) => {
+				let totalincome = land * landGold;
+				return totalincome * goodEconomyMultiplier;
+			});
+		} else if (greatEconomy) {
+			setIncome((income) => {
+				let totalincome = land * landGold;
+
+				return totalincome * greatEconomyMultiplier;
+			});
+		} else if (badEconomy) {
+			setIncome((income) => {
+				let totalincome = land * landGold;
+
+				return totalincome * badEconomyMultiplier;
+			});
+		} else if (horribleEconomy) {
+			setIncome((income) => {
+				let totalincome = land * landGold;
+
+				return totalincome * horribleEconomyMultiplier;
+			});
+		} else {
+			setIncome((income) => land * landGold);
+		}
 	};
+
+	// check economy health every time food changes
+	useEffect(() => {
+		if (food >= 105 && food < 150) {
+			setHorribleEconomy(false);
+			setBadEconomy(false);
+			setGreatEconomy(false);
+			setGoodEconomy(true);
+		}
+
+		if (food > 150) {
+			setHorribleEconomy(false);
+			setBadEconomy(false);
+			setGoodEconomy(false);
+			setGreatEconomy(true);
+		}
+
+		if (food <= 95 && food > 50) {
+			setGreatEconomy(false);
+			setGoodEconomy(false);
+			setHorribleEconomy(false);
+			setBadEconomy(true);
+		}
+
+		if (food <= 50) {
+			setGreatEconomy(false);
+			setGoodEconomy(false);
+			setBadEconomy(false);
+			setHorribleEconomy(true);
+		}
+	}, [food]);
 
 	// Increase income every time land gets updated
 	useEffect(() => {
 		if (land > 0) increaseIncome();
 	}, [land]);
 
-	// Update gold every 5s
+	// Update resources every 5s
 	useInterval(() => {
-		setGold((gold) => gold + income);
-	}, 5000);
+		setGold((gold) => Math.round(gold + income));
+		setStone((stone) =>
+			Math.round(stone + numStoneMines * 20 + numMegaStoneMines * 140)
+		);
+		setFood(
+			(food) => Math.round(food - land * 1) + numFarms * 2 + numMegaFarms * 15
+		);
+	}, 4000);
 
 	const createGameBoard = () => {
-		return new Promise((res, rej) => {
-			const initData = (i, j, type) => {
-				// initial tile data
-				let manual = {
-					Empty: {
-						amount: {
-							gold: 150,
-							stone: 0,
-							combat: 0,
-						},
-						image: null,
+		const initData = (i, j, type) => {
+			// initial tile data
+			let manual = {
+				Empty: {
+					amount: {
+						gold: 150,
+						stone: 0,
+						combat: 0,
 					},
-					Farm: {
-						amount: {
-							gold: 250,
-							stone: 50,
-							combat: 0,
-						},
-						image: Farm,
+					image: null,
+				},
+				Farm: {
+					amount: {
+						gold: 250,
+						stone: 100,
+						combat: 0,
 					},
-					MegaFarm: {
-						amount: {
-							gold: 1000,
-							stone: 200,
-							combat: 0,
-						},
-						image: MegaFarm,
+					image: Farm,
+				},
+				MegaFarm: {
+					amount: {
+						gold: 1000,
+						stone: 200,
+						combat: 0,
 					},
-					StoneMine: {
-						amount: {
-							gold: 400,
-							stone: 0,
-							combat: 0,
-						},
-						image: StoneMine,
+					image: MegaFarm,
+				},
+				StoneMine: {
+					amount: {
+						gold: 400,
+						stone: 0,
+						combat: 0,
 					},
-					MegaStoneMine: {
-						amount: {
-							gold: 2000,
-							stone: 200,
-							combat: 250,
-						},
-						image: MegaStoneMine,
+					image: StoneMine,
+				},
+				MegaStoneMine: {
+					amount: {
+						gold: 2000,
+						stone: 200,
+						combat: 250,
 					},
-					Wolf: {
-						amount: {
-							gold: 150,
-							combat: 250,
-							stone: 0,
-						},
-						image: Wolf,
+					image: MegaStoneMine,
+				},
+				Wolf: {
+					amount: {
+						gold: 150,
+						combat: 250,
+						stone: 0,
 					},
-					AlphaWolf: {
-						amount: {
-							gold: 150,
-							stone: 0,
-							combat: 1500,
-						},
-						image: AlphaWolf,
+					image: Wolf,
+				},
+				AlphaWolf: {
+					amount: {
+						gold: 150,
+						stone: 0,
+						combat: 1500,
 					},
-					Mountain: {
-						amount: {
-							gold: 750,
-							stone: 50,
-							combat: 150,
-						},
-						image: Mountain,
+					image: AlphaWolf,
+				},
+				Mountain: {
+					amount: {
+						gold: 750,
+						stone: 50,
+						combat: 50,
 					},
-				};
-
-				return {
-					position: [i, j],
-					i: i,
-					j: j,
-					isBought: false,
-					type: type,
-					image: manual[type].image,
-					cost: manual[type].amount,
-				};
+					image: Mountain,
+				},
 			};
 
-			for (let i = 0; i < board.length; i++) {
-				for (let j = 0; j < board[i].length; j++) {
-					// create a random number
-					let random = createRandomNum();
+			return {
+				position: [i, j],
+				i: i,
+				j: j,
+				isBought: false,
+				type: type,
+				image: manual[type].image,
+				cost: manual[type].amount,
+			};
+		};
 
-					// create an empty tile 50% of the time
-					if (random >= 50) {
+		for (let i = 0; i < board.length; i++) {
+			for (let j = 0; j < board[i].length; j++) {
+				// create a random number
+				let random = createRandomNum();
+
+				// create an empty tile 50% of the time
+				if (random >= 50) {
+					setBoard((prevBoard) => {
+						prevBoard[i][j] = initData(i, j, 'Empty');
+						return prevBoard;
+					});
+				}
+
+				// Create a farm 9% of the time
+				else if (random < 50 && random > 40) {
+					// 5% chance to create Mega Farm
+					let megaChance = createRandomNum();
+					if (megaChance <= 12) {
 						setBoard((prevBoard) => {
-							prevBoard[i][j] = initData(i, j, 'Empty');
+							prevBoard[i][j] = initData(i, j, 'MegaFarm');
 							return prevBoard;
 						});
-					}
-
-					// Create a farm 9% of the time
-					else if (random < 50 && random > 40) {
-						// 5% chance to create Mega Farm
-						let megaChance = createRandomNum();
-						if (megaChance <= 12) {
-							setBoard((prevBoard) => {
-								prevBoard[i][j] = initData(i, j, 'MegaFarm');
-								return prevBoard;
-							});
-						} else {
-							setBoard((prevBoard) => {
-								prevBoard[i][j] = initData(i, j, 'Farm');
-								return prevBoard;
-							});
-						}
-					}
-
-					// 19% chance to create an stone mine
-					else if (random > 20 && random <= 40) {
-						// 5% chance to create Mega Stone mine
-						let megaChance = createRandomNum();
-						if (megaChance <= 12) {
-							setBoard((prevBoard) => {
-								prevBoard[i][j] = initData(i, j, 'MegaStoneMine');
-								return prevBoard;
-							});
-						} else {
-							setBoard((prevBoard) => {
-								prevBoard[i][j] = initData(i, j, 'StoneMine');
-								return prevBoard;
-							});
-						}
-					}
-
-					// 10%
-					else if (random <= 20 && random > 9) {
-						// 5% chance to create Alpha Wolf
-						let megaChance = createRandomNum();
-						if (megaChance <= 8) {
-							setBoard((prevBoard) => {
-								prevBoard[i][j] = initData(i, j, 'AlphaWolf');
-								return prevBoard;
-							});
-						} else {
-							setBoard((prevBoard) => {
-								prevBoard[i][j] = initData(i, j, 'Wolf');
-								return prevBoard;
-							});
-						}
 					} else {
 						setBoard((prevBoard) => {
-							prevBoard[i][j] = initData(i, j, 'Mountain');
+							prevBoard[i][j] = initData(i, j, 'Farm');
 							return prevBoard;
 						});
 					}
 				}
+
+				// 19% chance to create an stone mine
+				else if (random > 20 && random <= 40) {
+					// 5% chance to create Mega Stone mine
+					let megaChance = createRandomNum();
+					if (megaChance <= 12) {
+						setBoard((prevBoard) => {
+							prevBoard[i][j] = initData(i, j, 'MegaStoneMine');
+							return prevBoard;
+						});
+					} else {
+						setBoard((prevBoard) => {
+							prevBoard[i][j] = initData(i, j, 'StoneMine');
+							return prevBoard;
+						});
+					}
+				}
+
+				// 10%
+				else if (random <= 20 && random > 9) {
+					// 5% chance to create Alpha Wolf
+					let megaChance = createRandomNum();
+					if (megaChance <= 8) {
+						setBoard((prevBoard) => {
+							prevBoard[i][j] = initData(i, j, 'AlphaWolf');
+							return prevBoard;
+						});
+					} else {
+						setBoard((prevBoard) => {
+							prevBoard[i][j] = initData(i, j, 'Wolf');
+							return prevBoard;
+						});
+					}
+				} else {
+					setBoard((prevBoard) => {
+						prevBoard[i][j] = initData(i, j, 'Mountain');
+						return prevBoard;
+					});
+				}
 			}
-		});
+		}
+		setBoardCreated(true);
 	};
 
 	const initBoard = () => {
-		createGameBoard().then(addNeighborData());
+		createGameBoard();
 	};
 
 	// create the game board if the user has clicked to start the game
 	useEffect(() => {
 		!startGame && initBoard();
 	}, []);
+
+	useEffect(() => {
+		addNeighborData();
+	}, [boardCreated]);
 
 	// start the game
 	const handleStartGame = () => setStartGame(true);
@@ -262,8 +356,11 @@ export default function App() {
 			gold >= data.cost.gold &&
 			stone >= data.cost.stone &&
 			combat >= data.cost.combat
-		)
+		) {
 			purchaseBase(data);
+		}
+
+		if (data.isBought === true) return;
 
 		// determine if player has enough resources
 		if (
@@ -277,14 +374,9 @@ export default function App() {
 	};
 
 	const purchaseBase = (data) => {
-		let goldAmount = 100;
-		let stoneAmount = 1000;
-		let combatAmount = 0;
-
-		checkResources(goldAmount, stoneAmount, combatAmount);
-
+		reduceResources(data.cost.gold, data.cost.stone, data.cost.combat);
 		setBase(true);
-
+		updateStructureCount(data.type);
 		setBoard((prevBoard) => {
 			prevBoard[data.i].splice(data.j, 1, {
 				...data,
@@ -295,29 +387,43 @@ export default function App() {
 		});
 	};
 
-	// Update Tiles / Resources Functions
-	const updateGold = (cost) => setGold((gold) => gold - cost);
-	const updateLand = () => setLand((land) => land + 1);
-	const updateStone = (cost) => setStone((stone) => stone - cost);
-	const updateCombat = (cost) => setCombat(combat);
-
 	// Update isBought: true
 	const updateIsBought = (data) => Object.assign(data, { isBought: true });
 	const updateIsBase = (data) => Object.assign(data, { isBase: true });
 
-	const checkResources = (goldCost, stoneCost, combatCost) => {
+	const reduceResources = (goldCost, stoneCost, combatCost) => {
 		if (goldCost > 0) updateGold(goldCost);
 		if (stoneCost > 0) updateStone(stoneCost);
 		if (combatCost > 0) updateCombat(combatCost);
 	};
 
+	const updateStructureCount = (type) => {
+		if (type === 'Farm') setNumFarms((x) => x + 1);
+		if (type === 'MegaFarm') setNumMegaFarms((x) => x + 1);
+		if (type === 'Wolf') {
+			setNumWolves((x) => x + 1);
+			setCombat((combat) => combat + 250);
+		}
+
+		if (type === 'AlphaWolf') {
+			setNumAlphaWolves((x) => x + 1);
+			setCombat((combat) => combat + 2500);
+		}
+		if (type === 'StoneMine') setNumStoneMines((x) => x + 1);
+		if (type === 'MegaStoneMine') setNumMegaStoneMines((x) => x + 1);
+		if (type === 'Mountain') {
+			setNumMountains((x) => x + 1);
+			setCombat((combat) => combat + 200);
+		}
+		if (type === 'Empty') setNumEmpty((x) => x + 1);
+
+		updateLand();
+	};
+
 	// Update Tile
 	const updateTile = (data) => {
-		// Subtract resources depending on the amount of the tile
-		checkResources(data.cost.gold, data.cost.stone, data.cost.combat);
-
-		// complete ownership of tile
-		updateLand();
+		reduceResources(data.cost.gold, data.cost.stone, data.cost.combat);
+		updateStructureCount(data.type);
 		setBoard((prevBoard) => {
 			prevBoard[data.i].splice(data.j, 1, { ...data, ...updateIsBought(data) });
 			return prevBoard;
@@ -328,8 +434,8 @@ export default function App() {
 		for (let i = 0; i < board.length; i++) {
 			for (let j = 0; j < board[i].length; j++) {
 				let data = board[i][j];
-				let neighbors = getNeighbors(i, j, data);
-				// console.log(neighbors);
+				// let neighbors = getNeighbors(i, j, data);
+				// console.log(typeof board[i - 1][j + 1] === 'undefined');
 
 				// for (let k = 0; k < neighbors.length; k++) {
 				// 	let numStoneMines = 0;
@@ -372,57 +478,73 @@ export default function App() {
 			[] [] []
 			[] [] []
 		*/
-
-		// Deep clone board
-		const clonedBoard = board.slice();
-		console.log(clonedBoard[i + 1][j]);
-
+		const clonedArr = board.slice();
 		const neighbors = [];
 
-		// 	// Check for existence of neights
-		// 	if (board[i - 1][j - 1] !== 'undefined')
-		// 		neighbors.push(board[i - 1][j - 1]);
-		// 	if (board[i - 1][j]) neighbors.push(board[i - 1][j]);
-		// 	if (board[i - 1][j + 1]) neighbors.push(board[i - 1][j + 1]);
+		let inc_i = i + 1;
+		let dec_i = i - 1;
+		let inc_j = j + 1;
+		let dec_j = j - 1;
 
-		// 	if (board[i + 1][j - 1]) neighbors.push(board[i + 1][j - 1]);
-		// 	if (board[i + 1][j]) neighbors.push(board[i + 1][j]);
-		// 	if (board[i + 1][j + 1]) neighbors.push(board[i + 1][j + 1]);
+		console.log(board[i + 1][j]);
+		console.log(neighbors);
 
-		// 	if (board[i][j - 1]) neighbors.push(board[i][j - 1]);
-		// 	if (board[i][j + 1]) neighbors.push(board[i][j + 1]);
+		if (board[dec_i][dec_j] === typeof 'object')
+			neighbors.push(board[dec_i][dec_j]);
+		if (clonedArr[i - 1][j] !== undefined) neighbors.push(clonedArr[i - 1][j]);
+		if (clonedArr[i - 1][j + 1] !== undefined)
+			neighbors.push(clonedArr[i - 1][j + 1]);
 
-		// 	return neighbors;
+		if (clonedArr[i + 1][j - 1] !== undefined)
+			neighbors.push(clonedArr[i + 1][j - 1]);
+		if (clonedArr[i + 1][j] !== undefined) neighbors.push(clonedArr[i + 1][j]);
+		if (clonedArr[i + 1][j + 1] !== undefined)
+			neighbors.push(clonedArr[i + 1][j + 1]);
+
+		if (clonedArr[i][j - 1] !== undefined) neighbors.push(clonedArr[i][j - 1]);
+		if (clonedArr[i][j + 1] !== undefined) neighbors.push(clonedArr[i][j + 1]);
+
+		return neighbors;
 	};
 	return (
 		<div className="container">
 			{startGame && (
-				<ul className="overview">
-					<li>
-						<img src={Gold} className="overview-icon" />
-						<span>{`Gold: ${gold}`}</span>
-					</li>
-					<li>
-						<img src={Income} className="overview-icon" />
-						<span>{`Income: ${income}`}</span>
-					</li>
-					<li>
-						<img src={Land} className="overview-icon" />
-						<span>{`Land: ${land}`}</span>
-					</li>
-					<li>
-						<img src={Food} className="overview-icon" />
-						<span>{`Food: ${food}`}</span>
-					</li>
-					<li>
-						<img src={Stone} className="overview-icon" />
-						<span>{`Stone: ${stone}`}</span>
-					</li>
-					<li>
-						<img src={Combat} className="overview-icon" />
-						<span>{`Combat: ${combat}`}</span>
-					</li>
-				</ul>
+				<header className="overview">
+					<ul>
+						<li>
+							<img src={Gold} className="overview-icon" />
+							<span>{`Gold: ${gold}`}</span>
+						</li>
+						<li>
+							<img src={Income} className="overview-icon" />
+							<span>{`Income: ${income}`}</span>
+						</li>
+						<li>
+							<img src={Land} className="overview-icon" />
+							<span>{`Land: ${land}`}</span>
+						</li>
+						<li>
+							<img src={Food} className="overview-icon" />
+							<span>{`Food: ${food}`}</span>
+						</li>
+						<li>
+							<img src={Stone} className="overview-icon" />
+							<span>{`Stone: ${stone}`}</span>
+						</li>
+						<li>
+							<img src={Combat} className="overview-icon" />
+							<span>{`Combat: ${combat}`}</span>
+						</li>
+					</ul>
+				</header>
+			)}
+			{startGame && (
+				<div className="resource-click-container">
+					<div className="resource-description"> Multiplier: 1x</div>
+					<button className="resource-click">
+						<span>Gold!</span>
+					</button>
+				</div>
 			)}
 
 			{!startGame && (
