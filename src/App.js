@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect } from 'react';
 import './App.scss';
 import useInterval from './hooks/useInterval';
 import AlphaWolf from './images/alpha-wolf-colored.png';
@@ -15,8 +15,6 @@ import Land from './images/land.png';
 import Stone from './images/stone.png';
 import Food from './images/food.png';
 import Combat from './images/combat.png';
-
-import Bought from './images/bought.png';
 
 const createRandomNum = () => Math.floor(Math.random() * 100) + 1;
 
@@ -453,8 +451,8 @@ export default function App() {
 	};
 
 	const addNeighborData = () => {
-		for (let i = 0; i < board.length; i++) {
-			for (let j = 0; j < board[i].length; j++) {
+		for (let i = 0; i < board.length - 1; i++) {
+			for (let j = 0; j < board[i].length - 1; j++) {
 				let data = board[i][j];
 				// let neighbors = getNeighbors(i, j, data);
 				// console.log(typeof board[i - 1][j + 1] === 'undefined');
@@ -503,28 +501,24 @@ export default function App() {
 		const clonedArr = board.slice();
 		const neighbors = [];
 
-		let inc_i = i + 1;
-		let dec_i = i - 1;
-		let inc_j = j + 1;
-		let dec_j = j - 1;
-
-		console.log(board[i + 1][j]);
 		console.log(neighbors);
 
-		if (board[dec_i][dec_j] === typeof 'object')
-			neighbors.push(board[dec_i][dec_j]);
-		if (clonedArr[i - 1][j] !== undefined) neighbors.push(clonedArr[i - 1][j]);
-		if (clonedArr[i - 1][j + 1] !== undefined)
-			neighbors.push(clonedArr[i - 1][j + 1]);
+		// if (clonedArr[i - 1][j - 1]) neighbors.push(clonedArr[i - 1][j - 1]);
 
-		if (clonedArr[i + 1][j - 1] !== undefined)
-			neighbors.push(clonedArr[i + 1][j - 1]);
-		if (clonedArr[i + 1][j] !== undefined) neighbors.push(clonedArr[i + 1][j]);
-		if (clonedArr[i + 1][j + 1] !== undefined)
-			neighbors.push(clonedArr[i + 1][j + 1]);
+		// if (clonedArr[i - 1][j - 1] !== undefined)
+		// 	neighbors.push(clonedArr[i - 1][j - 1]);
+		// if (clonedArr[i - 1][j] !== undefined) neighbors.push(clonedArr[i - 1][j]);
+		// if (clonedArr[i - 1][j + 1] !== undefined)
+		// 	neighbors.push(clonedArr[i - 1][j + 1]);
 
-		if (clonedArr[i][j - 1] !== undefined) neighbors.push(clonedArr[i][j - 1]);
-		if (clonedArr[i][j + 1] !== undefined) neighbors.push(clonedArr[i][j + 1]);
+		// if (clonedArr[i + 1][j - 1] !== undefined)
+		// 	neighbors.push(clonedArr[i + 1][j - 1]);
+		// if (clonedArr[i + 1][j] !== undefined) neighbors.push(clonedArr[i + 1][j]);
+		// if (clonedArr[i + 1][j + 1] !== undefined)
+		// 	neighbors.push(clonedArr[i + 1][j + 1]);
+
+		// if (clonedArr[i][j - 1] !== undefined) neighbors.push(clonedArr[i][j - 1]);
+		// if (clonedArr[i][j + 1] !== undefined) neighbors.push(clonedArr[i][j + 1]);
 
 		return neighbors;
 	};
